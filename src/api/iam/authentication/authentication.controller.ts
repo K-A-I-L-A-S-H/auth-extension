@@ -1,8 +1,16 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Res,
+} from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { SignUpDto } from './dto/signUp.dto';
-import { ApiVersions } from 'src/constants';
+import { ApiVersions, CookieNames } from 'src/constants';
 import { SignInDto } from './dto/signIn.dto';
+import { Response } from 'express';
 
 @Controller({
   version: ApiVersions.V1,
@@ -18,7 +26,17 @@ export class AuthenticationController {
 
   @HttpCode(HttpStatus.OK)
   @Post('signin')
-  handleSignin(@Body() signInDto: SignInDto) {
+  async handleSignin(
+    @Res({ passthrough: true }) response: Response,
+    @Body() signInDto: SignInDto,
+  ) {
     return this.authService.signin(signInDto);
+    // response.cookie(CookieNames.AccessToken, accessToken, {
+    // const accessToken = await this.authService.signin(signInDto);
+    // response.cookie(CookieNames.AccessToken, accessToken, {
+    //   secure: true,
+    //   httpOnly: true,
+    //   sameSite: true,
+    // });
   }
 }

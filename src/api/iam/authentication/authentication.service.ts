@@ -8,12 +8,20 @@ import { SignUpDto } from './dto/signUp.dto';
 import { HashingService } from '../hashing/hashing.service';
 import { QueryErrorCodes } from 'src/constants';
 import { SignInDto } from './dto/signIn.dto';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+
+export interface SignInResponse {
+  accessToken: string;
+}
 
 @Injectable()
 export class AuthenticationService {
   constructor(
-    private prisma: PrismaService,
-    private hashService: HashingService,
+    private readonly prisma: PrismaService,
+    private readonly hashService: HashingService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async signup({ email, password }: SignUpDto) {
@@ -35,7 +43,7 @@ export class AuthenticationService {
     }
   }
 
-  async signin({ email, password }: SignInDto): Promise<boolean> {
+  async signin({ email, password }: SignInDto): Promise<SignInResponse> {
     const user = await this.prisma.user.findUnique({
       where: {
         email,
@@ -50,11 +58,22 @@ export class AuthenticationService {
       password,
       user.password,
     );
-    console.log({ isValidPassword });
     if (!isValidPassword) {
       throw new UnauthorizedException('Password in incorrect');
     }
 
-    return true;
+    const accessToken = await this.jwtService.signAsync(
+      {
+        sub: user.id,
+        email: user.email,
+      },
+      {
+        audience: this.configService.get('JWT_TOKEN_AUDIENCE'),
+        issuer: this.configService.get('JWT_TOKEN_ISSUER'),
+        secret: this.configService.get('JWT_SECRET'),
+        expiresIn: this.configService.get('JWT_ACCESS_TOKEN_TTL'),
+      },
+    );
+    return { accessToken };
   }
 }
