@@ -1,6 +1,8 @@
 version: '3'
 services:
   db:
+    profiles:
+      - all
     image: postgres
     restart: always
     ports:
@@ -11,6 +13,27 @@ services:
       - POSTGRES_DATABASE=postgres
     volumes:
       - pgsql-volume:/var/lib/postgresql/data
+
+  backend:
+    profiles:
+      - backend
+      - all
+    depends_on:
+      - db
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: install
+    volumes:
+      - ./src:/app/src:cached
+      - ./prisma:/app/prisma:cached
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@localhost:5432/postgres
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    command: ['pnpm', 'run', 'start:dev']
 
 volumes:
   pgsql-volume:
