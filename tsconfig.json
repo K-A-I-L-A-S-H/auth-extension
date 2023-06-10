@@ -20,7 +20,7 @@
 		"strictPropertyInitialization": false,
 		"target": "ESNext",
 		"paths": {
-			"src/*": ["src/*"],
+			"@/*": ["./*"]
 		}
 	}
 }

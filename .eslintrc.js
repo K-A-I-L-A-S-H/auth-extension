@@ -1,25 +1,30 @@
 module.exports = {
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    project: 'tsconfig.json',
-    tsconfigRootDir : __dirname, 
-    sourceType: 'module',
-  },
-  plugins: ['@typescript-eslint/eslint-plugin'],
-  extends: [
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
-  ],
-  root: true,
-  env: {
-    node: true,
-    jest: true,
-  },
-  ignorePatterns: ['.eslintrc.js'],
-  rules: {
-    '@typescript-eslint/interface-name-prefix': 'off',
-    '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
-  },
+	parser: '@typescript-eslint/parser',
+	parserOptions: {
+		project: 'tsconfig.json',
+	},
+	ignorePatterns: ['.eslintrc.js'],
+	settings: {
+		'import/resolver': {
+			typescript: {
+				project: '.',
+			},
+		},
+	},
+	rules: {
+		'@typescript-eslint/no-extraneous-class': 0,
+		'@typescript-eslint/no-magic-numbers': 0,
+		'@typescript-eslint/no-unsafe-enum-comparison': 0,
+		'@typescript-eslint/naming-convention': [
+			'error',
+			{
+				selector: 'interface',
+				format: ['PascalCase'],
+				custom: {
+					regex: '(?!IOS)(^I[A-Z])',
+					match: false,
+				},
+			},
+		],
+	},
 };

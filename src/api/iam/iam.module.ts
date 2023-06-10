@@ -4,7 +4,9 @@ import { BcryptService } from './hashing/bcrypt.service';
 import { AuthenticationController } from './authentication/authentication.controller';
 import { AuthenticationService } from './authentication/authentication.service';
 import { JwtModule } from '@nestjs/jwt';
-import { PrismaService } from 'lib/prisma';
+import { PrismaService } from '@/lib/prisma';
+import { APP_GUARD } from '@nestjs/core';
+import { AccessTokenGuard } from '@/lib/guards/accessToken.guard';
 
 const JWT_MODULE = JwtModule.register({
   global: true,
@@ -22,6 +24,10 @@ const JWT_MODULE = JwtModule.register({
     {
       provide: HashingService,
       useClass: BcryptService,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AccessTokenGuard,
     },
     PrismaService,
     AuthenticationService,
