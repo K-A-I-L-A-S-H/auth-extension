@@ -9,3 +9,7 @@ export enum ErrorCodeNames {
 export const QueryErrorCodes: Record<ErrorCodeNames, string> = {
   PG_UNIQUE_VIOLATION_ERROR: 'P2002',
 };
+
+export const CookieNames: Record<string, string> = {
+  AccessToken: 'accessToken',
+};
