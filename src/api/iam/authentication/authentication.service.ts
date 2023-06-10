@@ -35,8 +35,9 @@ export class AuthenticationService {
           password: hashPassword,
         },
       });
-    } catch (err) {
-      if (err.code === QueryErrorCodes.PG_UNIQUE_VIOLATION_ERROR) {
+    } catch (err: unknown) {
+      const error = JSON.parse(err as string) as { code: string };
+      if (error.code === QueryErrorCodes.PG_UNIQUE_VIOLATION_ERROR) {
         throw new ConflictException('Email already used');
       }
       throw err;
