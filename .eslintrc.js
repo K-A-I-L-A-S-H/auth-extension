@@ -15,16 +15,5 @@ module.exports = {
 		'@typescript-eslint/no-extraneous-class': 0,
 		'@typescript-eslint/no-magic-numbers': 0,
 		'@typescript-eslint/no-unsafe-enum-comparison': 0,
-		'@typescript-eslint/naming-convention': [
-			'error',
-			{
-				selector: 'interface',
-				format: ['PascalCase'],
-				custom: {
-					regex: '(?!IOS)(^I[A-Z])',
-					match: false,
-				},
-			},
-		],
 	},
 };
