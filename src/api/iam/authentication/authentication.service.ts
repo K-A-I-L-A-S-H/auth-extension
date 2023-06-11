@@ -10,9 +10,11 @@ import { QueryErrorCodes } from 'src/constants';
 import { SignInDto } from './dto/signIn.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { ActiveUserData } from '../types';
+import { ActiveUserData, RefreshTokenPayload } from '../types';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
 import { User } from '@prisma/client';
+import { RefreshTokenIdsStorage } from './refreshTokenIds.storage';
+import { randomUUID } from 'crypto';
 
 export interface SignInResponse {
   accessToken: string;
@@ -26,6 +28,7 @@ export class AuthenticationService {
     private readonly hashService: HashingService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly refreshTokenIdsStorage: RefreshTokenIdsStorage,
   ) {}
 
   async signup({ email, password }: SignUpDto) {
@@ -71,18 +74,23 @@ export class AuthenticationService {
   }
 
   async generateTokens(user: User): Promise<SignInResponse> {
+    const refreshTokenId = randomUUID();
+
     const [accessToken, refreshToken] = await Promise.all([
       this.signToken<Partial<ActiveUserData>>(
         user.id,
         this.configService.get('JWT_ACCESS_TOKEN_TTL')!,
-        { email: user.email }
+        { email: user.email },
       ),
-      this.signToken<Partial<ActiveUserData>>(
+      this.signToken<RefreshTokenPayload>(
         user.id,
         this.configService.get('JWT_REFRESH_TOKEN_TTL')!,
-        { email: user.email }
+        { refreshTokenId },
       ),
     ]);
+
+    await this.refreshTokenIdsStorage.insertToken(refreshTokenId, refreshToken);
+
     return { accessToken, refreshToken };
   }
 
@@ -103,13 +111,24 @@ export class AuthenticationService {
 
   async refreshTokens({ refreshToken: token }: RefreshTokenDto) {
     try {
-      const { sub } = await this.jwtService.verifyAsync<
-        Pick<ActiveUserData, 'sub'>
+      const { sub, refreshTokenId } = await this.jwtService.verifyAsync<
+        Pick<ActiveUserData, 'sub'> & RefreshTokenPayload
       >(token, {
         audience: this.configService.get('JWT_TOKEN_AUDIENCE'),
         issuer: this.configService.get('JWT_TOKEN_ISSUER'),
         secret: this.configService.get('JWT_SECRET'),
       });
+
+      const isValid = await this.refreshTokenIdsStorage.validateToken(
+        refreshTokenId,
+        token,
+      );
+      
+      if (isValid) {
+        await this.refreshTokenIdsStorage.invalidateToken(refreshTokenId);
+      } else {
+        throw new UnauthorizedException('Refresh token is invalid');
+      }
 
       const user = await this.prisma.user.findFirstOrThrow({
         where: { id: sub },
