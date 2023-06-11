@@ -10,9 +10,11 @@ import { QueryErrorCodes } from 'src/constants';
 import { SignInDto } from './dto/signIn.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { ActiveUserData } from '../types';
 
 export interface SignInResponse {
   accessToken: string;
+  refreshToken: string;
 }
 
 @Injectable()
@@ -63,18 +65,33 @@ export class AuthenticationService {
       throw new UnauthorizedException('Password in incorrect');
     }
 
-    const accessToken = await this.jwtService.signAsync(
+    const [accessToken, refreshToken] = await Promise.all([
+      this.signToken<Partial<ActiveUserData>>(
+        user.id,
+        this.configService.get('JWT_ACCESS_TOKEN_TTL')!,
+        { email: user.email },
+      ),
+      this.signToken<Partial<ActiveUserData>>(
+        user.id,
+        this.configService.get('JWT_REFRESH_TOKEN_TTL')!,
+        { email: user.email },
+      ),
+    ]);
+    return { accessToken, refreshToken };
+  }
+
+  private async signToken<T>(userId: string, expiresIn: string, payload: T) {
+    return await this.jwtService.signAsync(
       {
-        sub: user.id,
-        email: user.email,
+        sub: userId,
+        ...payload,
       },
       {
         audience: this.configService.get('JWT_TOKEN_AUDIENCE'),
         issuer: this.configService.get('JWT_TOKEN_ISSUER'),
         secret: this.configService.get('JWT_SECRET'),
-        expiresIn: this.configService.get('JWT_ACCESS_TOKEN_TTL'),
+        expiresIn,
       },
     );
-    return { accessToken };
   }
 }

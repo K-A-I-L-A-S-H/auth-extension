@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { SignUpDto } from './dto/signUp.dto';
-import { ApiVersions, AuthType, CookieNames } from 'src/constants';
+import { ApiVersions, AuthType } from 'src/constants';
 import { SignInDto } from './dto/signIn.dto';
 import { Response } from 'express';
 import { Auth } from '@/lib/decorators/auth.decorator';
