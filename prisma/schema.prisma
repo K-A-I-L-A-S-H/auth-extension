@@ -20,7 +20,8 @@ model User {
   password String  @db.VarChar(511)
   roleId   String
 
-  role Role @relation(fields: [roleId], references: [id])
+  role           Role             @relation(fields: [roleId], references: [id])
+  userPermission UserPermission[]
 }
 
 model Role {
@@ -30,4 +31,26 @@ model Role {
 
   role String @unique @db.VarChar(255)
   User User[]
+}
+
+model Permission {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  permission     String           @unique @db.VarChar(255)
+  userPermission UserPermission[]
+}
+
+model UserPermission {
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId       String
+  permissionId String
+
+  user        User       @relation(fields: [userId], references: [id])
+  permissions Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([userId, permissionId])
 }
