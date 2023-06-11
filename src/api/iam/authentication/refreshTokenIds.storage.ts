@@ -1,10 +1,6 @@
 import { InvalidateRefreshTokenError } from '@/lib/exceptions/invalidatedToken.exception';
 import { RedisService } from '@/lib/redis/redis.service';
-import {
-  Injectable,
-  Logger,
-  OnApplicationShutdown,
-} from '@nestjs/common';
+import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
 
 @Injectable()
 export class RefreshTokenIdsStorage implements OnApplicationShutdown {

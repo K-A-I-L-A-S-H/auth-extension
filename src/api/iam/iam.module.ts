@@ -10,6 +10,7 @@ import { AccessTokenGuard } from '@/lib/guards/accessToken.guard';
 import { AuthenticationGuard } from '@/lib/guards/authentication.guard';
 import { RefreshTokenIdsStorage } from './authentication/refreshTokenIds.storage';
 import { RedisService } from '@/lib/redis/redis.service';
+import { RoleGuard } from '@/lib/guards/roles.guard';
 
 const JWT_MODULE = JwtModule.register({
   global: true,
@@ -31,6 +32,10 @@ const JWT_MODULE = JwtModule.register({
     {
       provide: APP_GUARD,
       useClass: AuthenticationGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RoleGuard,
     },
     AccessTokenGuard,
     AuthenticationService,
