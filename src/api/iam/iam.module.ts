@@ -8,6 +8,8 @@ import { PrismaService } from '@/lib/prisma';
 import { APP_GUARD } from '@nestjs/core';
 import { AccessTokenGuard } from '@/lib/guards/accessToken.guard';
 import { AuthenticationGuard } from '@/lib/guards/authentication.guard';
+import { RefreshTokenIdsStorage } from './authentication/refreshTokenIds.storage';
+import { RedisService } from '@/lib/redis/redis.service';
 
 const JWT_MODULE = JwtModule.register({
   global: true,
@@ -33,6 +35,8 @@ const JWT_MODULE = JwtModule.register({
     AccessTokenGuard,
     AuthenticationService,
     PrismaService,
+    RedisService,
+    RefreshTokenIdsStorage,
   ],
   controllers: [AuthenticationController],
 })
