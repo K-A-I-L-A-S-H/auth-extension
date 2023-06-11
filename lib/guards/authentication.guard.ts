@@ -1,6 +1,10 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Observable } from 'rxjs';
 import { AccessTokenGuard } from './accessToken.guard';
 import { AuthType } from '@/src/constants';
 import { AUTH_TYPE_KEY } from '../constants';
@@ -14,13 +18,8 @@ export class AuthenticationGuard implements CanActivate {
     private readonly accessTokenGuard: AccessTokenGuard,
   ) {}
 
-  async canActivate(
-    context: ExecutionContext,
-  ): Promise<boolean> {
-    const authTypeGuardMap: Record<
-      AuthType,
-      CanActivate | CanActivate[]
-    > = {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const authTypeGuardMap: Record<AuthType, CanActivate | CanActivate[]> = {
       [AuthType.Bearer]: this.accessTokenGuard,
       [AuthType.None]: { canActivate: () => true },
     };
@@ -30,12 +29,12 @@ export class AuthenticationGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     ) ?? [AuthenticationGuard.defaultAuthType];
     const guards = authTypes.map((type) => authTypeGuardMap[type]).flat();
-    
+
     let error = new UnauthorizedException();
 
-    for (const guard of guards){
+    for (const guard of guards) {
       const canActivate = await Promise.resolve(
-        guard.canActivate(context)
+        guard.canActivate(context),
       ).catch((err) => {
         error = err;
       });
@@ -43,8 +42,8 @@ export class AuthenticationGuard implements CanActivate {
       if (canActivate) {
         return true;
       }
-    };
-    
+    }
+
     throw error;
   }
 }
