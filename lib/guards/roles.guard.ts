@@ -12,11 +12,10 @@ export class RoleGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const contextRoles =
-      this.reflector.getAllAndOverride<UserRoles[]>(ROLES_KEY, [
-        context.getHandler(),
-        context.getClass(),
-      ]);
+    const contextRoles = this.reflector.getAllAndOverride<UserRoles[]>(
+      ROLES_KEY,
+      [context.getHandler(), context.getClass()],
+    );
     if (!contextRoles) {
       return true;
     }
@@ -34,6 +33,6 @@ export class RoleGuard implements CanActivate {
       return false;
     }
 
-    return contextRoles.some(role => role === userRole.role);
+    return contextRoles.some((role) => role === userRole.role);
   }
 }
