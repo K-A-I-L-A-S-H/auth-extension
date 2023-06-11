@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PrismaService } from '@/lib/prisma';
 import { APP_GUARD } from '@nestjs/core';
 import { AccessTokenGuard } from '@/lib/guards/accessToken.guard';
+import { AuthenticationGuard } from '@/lib/guards/authentication.guard';
 
 const JWT_MODULE = JwtModule.register({
   global: true,
@@ -27,10 +28,11 @@ const JWT_MODULE = JwtModule.register({
     },
     {
       provide: APP_GUARD,
-      useClass: AccessTokenGuard,
+      useClass: AuthenticationGuard,
     },
-    PrismaService,
+    AccessTokenGuard,
     AuthenticationService,
+    PrismaService,
   ],
   controllers: [AuthenticationController],
 })
