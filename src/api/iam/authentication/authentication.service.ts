@@ -15,6 +15,7 @@ import { RefreshTokenDto } from './dto/refreshToken.dto';
 import { User } from '@prisma/client';
 import { RefreshTokenIdsStorage } from './refreshTokenIds.storage';
 import { randomUUID } from 'crypto';
+import { InvalidateRefreshTokenError } from '@/lib/exceptions/invalidatedToken.exception';
 
 export interface SignInResponse {
   accessToken: string;
@@ -136,7 +137,12 @@ export class AuthenticationService {
 
       return this.generateTokens(user);
     } catch (err) {
-      throw new UnauthorizedException();
+      let message = '';
+      if (err instanceof InvalidateRefreshTokenError) {
+        // @TODO: Notify user that their access credentials have been compromised
+        message = 'Access Denied';
+      }
+      throw new UnauthorizedException(message);
     }
   }
 }
