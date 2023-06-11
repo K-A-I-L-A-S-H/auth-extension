@@ -1,9 +1,13 @@
+import { Permission } from '../src/api/iam/constants';
+import { UserRoles } from '../src/api/iam/types';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-const ROLES: string[] = ['admin', 'regular'];
+const ROLES: string[] = Object.keys(UserRoles);
+
+const PERMISSIONS: string[] = Object.keys(Permission);
 
 async function seed() {
   const roles = await Promise.resolve(
@@ -19,8 +23,21 @@ async function seed() {
     }),
   );
 
+  const permissions = await Promise.all(
+    PERMISSIONS.map(async (permissionVal) => {
+      const permission = prisma.permission.upsert({
+        where: { permission: permissionVal },
+        update: {},
+        create: {
+          permission: permissionVal,
+        },
+      });
+      return permission;
+    }),
+  );
+
   const salt = bcrypt.genSaltSync();
-  await prisma.user.upsert({
+  const user = await prisma.user.upsert({
     where: { email: 'user@mail.com' },
     update: {},
     create: {
@@ -34,6 +51,17 @@ async function seed() {
       },
     },
   });
+
+  await Promise.all(
+    permissions.map(async (permission) => {
+      await prisma.userPermission.create({
+        data: {
+          userId: user.id,
+          permissionId: permission.id,
+        },
+      });
+    }),
+  );
 }
 
 seed()
