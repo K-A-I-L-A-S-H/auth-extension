@@ -12,6 +12,7 @@ import { ApiVersions, AuthType } from 'src/constants';
 import { SignInDto } from './dto/signIn.dto';
 import { Response } from 'express';
 import { Auth } from '@/lib/decorators/auth.decorator';
+import { RefreshTokenDto } from './dto/refreshToken.dto';
 
 @Auth(AuthType.None)
 @Controller({
@@ -40,5 +41,11 @@ export class AuthenticationController {
     //   httpOnly: true,
     //   sameSite: true,
     // });
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('token/refresh')
+  async handleRefreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
+    return this.authService.refreshTokens(refreshTokenDto);
   }
 }
