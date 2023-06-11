@@ -11,7 +11,12 @@ import { QueryErrorCodes } from 'src/constants';
 import { SignInDto } from './dto/signIn.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { ActiveUserData, RefreshTokenPayload, UserRoles } from '../types';
+import {
+  ActiveUserData,
+  PermissionType,
+  RefreshTokenPayload,
+  UserRoles,
+} from '../types';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
 import { Role, User } from '@prisma/client';
 import { RefreshTokenIdsStorage } from './refreshTokenIds.storage';
@@ -63,7 +68,7 @@ export class AuthenticationService {
           role,
         },
       });
-    } catch(err) {
+    } catch (err) {
       throw new BadRequestException('Role is invalid');
     }
   }
@@ -93,11 +98,26 @@ export class AuthenticationService {
   async generateTokens(user: User): Promise<SignInResponse> {
     const refreshTokenId = randomUUID();
 
+    const userPermissions = await this.prisma.userPermission.findMany({
+      where: {
+        userId: user.id,
+      },
+      select: {
+        permissions: true,
+      },
+    });
+
     const [accessToken, refreshToken] = await Promise.all([
       this.signToken<Partial<ActiveUserData>>(
         user.id,
         this.configService.get('JWT_ACCESS_TOKEN_TTL')!,
-        { email: user.email, role: user.roleId },
+        {
+          email: user.email,
+          role: user.roleId,
+          permissions: userPermissions.map(
+            (p) => p.permissions.permission as PermissionType,
+          ),
+        },
       ),
       this.signToken<RefreshTokenPayload>(
         user.id,
