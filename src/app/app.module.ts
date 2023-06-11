@@ -6,6 +6,7 @@ import { UsersModule } from 'src/api/users/users.module';
 import { PrismaModule } from 'lib/prisma';
 import { ConfigModule } from '@nestjs/config';
 import { IAMModule } from 'src/api/iam';
+import { RedisModule } from '@/lib/redis/redis.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { IAMModule } from 'src/api/iam';
     ConfigModule.forRoot({ isGlobal: true }),
     IAMModule,
     PrismaModule,
+    RedisModule,
     UsersModule,
   ],
   controllers: [AppController],
