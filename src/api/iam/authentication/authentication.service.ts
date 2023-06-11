@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -10,9 +11,9 @@ import { QueryErrorCodes } from 'src/constants';
 import { SignInDto } from './dto/signIn.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { ActiveUserData, RefreshTokenPayload } from '../types';
+import { ActiveUserData, RefreshTokenPayload, UserRoles } from '../types';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
-import { User } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 import { RefreshTokenIdsStorage } from './refreshTokenIds.storage';
 import { randomUUID } from 'crypto';
 import { InvalidateRefreshTokenError } from '@/lib/exceptions/invalidatedToken.exception';
@@ -32,8 +33,10 @@ export class AuthenticationService {
     private readonly refreshTokenIdsStorage: RefreshTokenIdsStorage,
   ) {}
 
-  async signup({ email, password }: SignUpDto) {
+  async signup({ email, password, role = UserRoles.regular }: SignUpDto) {
     const hashPassword = await this.hashService.hash(password);
+
+    const userRole = await this.getUserRole(role);
 
     try {
       await this.prisma.user.create({
@@ -41,6 +44,7 @@ export class AuthenticationService {
           email,
           name: email,
           password: hashPassword,
+          roleId: userRole.id,
         },
       });
     } catch (err: unknown) {
@@ -49,6 +53,18 @@ export class AuthenticationService {
         throw new ConflictException('Email already used');
       }
       throw err;
+    }
+  }
+
+  async getUserRole(role: string): Promise<Role> {
+    try {
+      return this.prisma.role.findFirstOrThrow({
+        where: {
+          role,
+        },
+      });
+    } catch(err) {
+      throw new BadRequestException('Role is invalid');
     }
   }
 
@@ -81,7 +97,7 @@ export class AuthenticationService {
       this.signToken<Partial<ActiveUserData>>(
         user.id,
         this.configService.get('JWT_ACCESS_TOKEN_TTL')!,
-        { email: user.email },
+        { email: user.email, role: user.roleId },
       ),
       this.signToken<RefreshTokenPayload>(
         user.id,
@@ -124,7 +140,7 @@ export class AuthenticationService {
         refreshTokenId,
         token,
       );
-      
+
       if (isValid) {
         await this.refreshTokenIdsStorage.invalidateToken(refreshTokenId);
       } else {
