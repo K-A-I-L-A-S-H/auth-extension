@@ -11,6 +11,8 @@ import { SignInDto } from './dto/signIn.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { ActiveUserData } from '../types';
+import { RefreshTokenDto } from './dto/refreshToken.dto';
+import { User } from '@prisma/client';
 
 export interface SignInResponse {
   accessToken: string;
@@ -65,16 +67,20 @@ export class AuthenticationService {
       throw new UnauthorizedException('Password in incorrect');
     }
 
+    return this.generateTokens(user);
+  }
+
+  async generateTokens(user: User): Promise<SignInResponse> {
     const [accessToken, refreshToken] = await Promise.all([
       this.signToken<Partial<ActiveUserData>>(
         user.id,
         this.configService.get('JWT_ACCESS_TOKEN_TTL')!,
-        { email: user.email },
+        { email: user.email }
       ),
       this.signToken<Partial<ActiveUserData>>(
         user.id,
         this.configService.get('JWT_REFRESH_TOKEN_TTL')!,
-        { email: user.email },
+        { email: user.email }
       ),
     ]);
     return { accessToken, refreshToken };
@@ -93,5 +99,25 @@ export class AuthenticationService {
         expiresIn,
       },
     );
+  }
+
+  async refreshTokens({ refreshToken: token }: RefreshTokenDto) {
+    try {
+      const { sub } = await this.jwtService.verifyAsync<
+        Pick<ActiveUserData, 'sub'>
+      >(token, {
+        audience: this.configService.get('JWT_TOKEN_AUDIENCE'),
+        issuer: this.configService.get('JWT_TOKEN_ISSUER'),
+        secret: this.configService.get('JWT_SECRET'),
+      });
+
+      const user = await this.prisma.user.findFirstOrThrow({
+        where: { id: sub },
+      });
+
+      return this.generateTokens(user);
+    } catch (err) {
+      throw new UnauthorizedException();
+    }
   }
 }
