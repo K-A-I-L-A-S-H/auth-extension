@@ -35,7 +35,6 @@ export class PrismaService
 
     if (this.configService.get('ENABLE_PRISMA_LOG')) {
       this.$on(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-expect-error
         'query',
         ({

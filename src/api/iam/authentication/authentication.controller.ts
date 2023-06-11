@@ -8,10 +8,12 @@ import {
 } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { SignUpDto } from './dto/signUp.dto';
-import { ApiVersions, CookieNames } from 'src/constants';
+import { ApiVersions, AuthType, CookieNames } from 'src/constants';
 import { SignInDto } from './dto/signIn.dto';
 import { Response } from 'express';
+import { Auth } from '@/lib/decorators/auth.decorator';
 
+@Auth(AuthType.None)
 @Controller({
   version: ApiVersions.V1,
   path: 'authentication',

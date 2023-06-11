@@ -13,3 +13,8 @@ export const QueryErrorCodes: Record<ErrorCodeNames, string> = {
 export const CookieNames: Record<string, string> = {
   AccessToken: 'accessToken',
 };
+
+export enum AuthType {
+  Bearer,
+  None,
+}
