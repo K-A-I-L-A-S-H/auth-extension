@@ -15,6 +15,8 @@ import { PermissionGuard } from '@/lib/guards/permission.guard';
 import { ApiKeyGuard } from '@/lib/guards/apiKey.guard';
 import { ApiKeysController } from './apiKeys/apiKeys.controller';
 import { ApiKeysService } from './apiKeys/apiKeys.service';
+import { GoogleAuthService } from './authentication/social/googleAuth.service';
+import { GoogleAuthController } from './authentication/social/googleAuth.controller';
 
 const JWT_MODULE = JwtModule.register({
   global: true,
@@ -49,10 +51,15 @@ const JWT_MODULE = JwtModule.register({
     ApiKeyGuard,
     ApiKeysService,
     AuthenticationService,
+    GoogleAuthService,
     PrismaService,
     RedisService,
     RefreshTokenIdsStorage,
   ],
-  controllers: [AuthenticationController, ApiKeysController],
+  controllers: [
+    ApiKeysController,
+    AuthenticationController,
+    GoogleAuthController,
+  ],
 })
 export class IAMModule {}
