@@ -17,20 +17,26 @@ import { ActiveUserData, UserRoles } from '../iam/types';
 import { Roles } from '@/lib/decorators/roles.decorator';
 import { Permissions } from '@/lib/decorators/permission.decorator';
 import { Permission } from '@/src/api/iam/constants';
+import { Auth } from '@/lib/decorators/auth.decorator';
+import { AuthType } from '@/src/constants';
 
+@Auth(AuthType.Bearer, AuthType.ApiKey)
 @Controller('coffees')
 export class CoffeesController {
   constructor(private readonly coffeesService: CoffeesService) {}
 
-  @Roles(UserRoles.admin)
-  @Permissions(Permission.CreateCoffee)
+  // @Roles(UserRoles.admin)
+  // @Permissions(Permission.CreateCoffee)
   @Post()
-  create(@Body() createCoffeeDto: CreateCoffeeDto) {
+  create(
+    @Body() createCoffeeDto: CreateCoffeeDto,
+  ) {
     return this.coffeesService.create(createCoffeeDto);
   }
 
   @Get()
   findAll(@ActiveUser() user: ActiveUserData) {
+    console.log({ user });
     return this.coffeesService.findAll();
   }
 

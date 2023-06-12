@@ -15,6 +15,7 @@ export const CookieNames: Record<string, string> = {
 };
 
 export enum AuthType {
-  Bearer,
-  None,
+  ApiKey = 'ApiKey',
+  Bearer = 'Bearer',
+  None = 'None',
 }

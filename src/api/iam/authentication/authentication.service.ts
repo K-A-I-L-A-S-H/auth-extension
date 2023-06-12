@@ -19,7 +19,7 @@ import {
 } from '../types';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
 import { Role, User } from '@prisma/client';
-import { RefreshTokenIdsStorage } from './refreshTokenIds.storage';
+import { RefreshTokenIdsStorage } from '../authorizarion/refreshTokenIds.storage';
 import { randomUUID } from 'crypto';
 import { InvalidateRefreshTokenError } from '@/lib/exceptions/invalidatedToken.exception';
 
