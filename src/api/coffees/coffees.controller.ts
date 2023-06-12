@@ -17,13 +17,16 @@ import { ActiveUserData, UserRoles } from '../iam/types';
 import { Roles } from '@/lib/decorators/roles.decorator';
 import { Permissions } from '@/lib/decorators/permission.decorator';
 import { Permission } from '@/src/api/iam/constants';
+import { Policies } from '@/lib/decorators/policy.decorator';
+import { FrameworkContributorPolicy } from '../iam/policyHandler/frameworkContributor/frameworkContributor.policy';
 
 @Controller('coffees')
 export class CoffeesController {
   constructor(private readonly coffeesService: CoffeesService) {}
 
-  @Roles(UserRoles.admin)
-  @Permissions(Permission.CreateCoffee)
+  // @Roles(UserRoles.admin)
+  // @Permissions(Permission.CreateCoffee)
+  @Policies(new FrameworkContributorPolicy())
   @Post()
   create(@Body() createCoffeeDto: CreateCoffeeDto) {
     return this.coffeesService.create(createCoffeeDto);

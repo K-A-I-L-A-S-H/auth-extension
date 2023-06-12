@@ -21,3 +21,12 @@ export enum CoffeesPermission {
 }
 
 export type PermissionType = CoffeesPermission;
+
+export interface Policy {
+  [key: string]: any;
+  name: string;
+}
+
+export interface PolicyHandler<T extends Policy> {
+  handler(policy: T, user: ActiveUserData): Promise<void>;
+}

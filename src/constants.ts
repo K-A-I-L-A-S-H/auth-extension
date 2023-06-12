@@ -18,3 +18,5 @@ export enum AuthType {
   Bearer,
   None,
 }
+
+export const DOMAIN_NAME = 'authtest.com';

@@ -12,6 +12,9 @@ import { RefreshTokenIdsStorage } from './authentication/refreshTokenIds.storage
 import { RedisService } from '@/lib/redis/redis.service';
 import { RoleGuard } from '@/lib/guards/roles.guard';
 import { PermissionGuard } from '@/lib/guards/permission.guard';
+import { FrameworkContributorPolicyHandler } from './policyHandler/frameworkContributor/frameworkContributor.handler';
+import { PolicyHandlerStorage } from './policyHandler/policyHandler.storage';
+import { PolicyGuard } from '@/lib/guards/policy.guard';
 
 const JWT_MODULE = JwtModule.register({
   global: true,
@@ -42,8 +45,14 @@ const JWT_MODULE = JwtModule.register({
       provide: APP_GUARD,
       useClass: PermissionGuard,
     },
+    {
+      provide: APP_GUARD,
+      useClass: PolicyGuard,
+    },
     AccessTokenGuard,
     AuthenticationService,
+    FrameworkContributorPolicyHandler,
+    PolicyHandlerStorage,
     PrismaService,
     RedisService,
     RefreshTokenIdsStorage,
