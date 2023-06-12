@@ -22,6 +22,7 @@ import { Role, User } from '@prisma/client';
 import { RefreshTokenIdsStorage } from '../authorizarion/refreshTokenIds.storage';
 import { randomUUID } from 'crypto';
 import { InvalidateRefreshTokenError } from '@/lib/exceptions/invalidatedToken.exception';
+import { OTPAuthenticationService } from './otpAuthentication/otpAuthentication.service';
 
 export interface SignInResponse {
   accessToken: string;
@@ -36,6 +37,7 @@ export class AuthenticationService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly refreshTokenIdsStorage: RefreshTokenIdsStorage,
+    private otpAuthService: OTPAuthenticationService,
   ) {}
 
   async signup({ email, password, role = UserRoles.regular }: SignUpDto) {
@@ -73,7 +75,7 @@ export class AuthenticationService {
     }
   }
 
-  async signin({ email, password }: SignInDto): Promise<SignInResponse> {
+  async signin({ email, password, tfaCode }: SignInDto): Promise<SignInResponse> {
     const user = await this.prisma.user.findUnique({
       where: {
         email,
@@ -90,6 +92,16 @@ export class AuthenticationService {
     );
     if (!isValidPassword) {
       throw new UnauthorizedException('Password in incorrect');
+    }
+
+    if(user.isTfaEnabled) {
+      const isValid = this.otpAuthService.verifyCode(
+        tfaCode!,
+        user.tfaSecret!,
+      );
+      if (!isValid) {
+        throw new UnauthorizedException('Invalid 2FA code');
+      }
     }
 
     return this.generateTokens(user);

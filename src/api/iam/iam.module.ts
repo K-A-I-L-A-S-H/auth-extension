@@ -17,6 +17,7 @@ import { ApiKeysController } from './apiKeys/apiKeys.controller';
 import { ApiKeysService } from './apiKeys/apiKeys.service';
 import { GoogleAuthService } from './authentication/social/googleAuth.service';
 import { GoogleAuthController } from './authentication/social/googleAuth.controller';
+import { OTPAuthenticationService } from './authentication/otpAuthentication/otpAuthentication.service';
 
 const JWT_MODULE = JwtModule.register({
   global: true,
@@ -52,6 +53,7 @@ const JWT_MODULE = JwtModule.register({
     ApiKeysService,
     AuthenticationService,
     GoogleAuthService,
+    OTPAuthenticationService,
     PrismaService,
     RedisService,
     RefreshTokenIdsStorage,
