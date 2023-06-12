@@ -28,9 +28,7 @@ export class CoffeesController {
   // @Roles(UserRoles.admin)
   // @Permissions(Permission.CreateCoffee)
   @Post()
-  create(
-    @Body() createCoffeeDto: CreateCoffeeDto,
-  ) {
+  create(@Body() createCoffeeDto: CreateCoffeeDto) {
     return this.coffeesService.create(createCoffeeDto);
   }
 
