@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, OnModuleInit, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  OnModuleInit,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OAuth2Client } from 'google-auth-library';
 import { AuthenticationService } from '../authentication.service';
@@ -28,6 +33,8 @@ export class GoogleAuthService implements OnModuleInit {
       const loginTicket = await this.oauthClient.verifyIdToken({
         idToken: token,
       });
+
+      //@ts-expect-error
       const { email, sub: googleId } = loginTicket.getPayload();
 
       const user = await this.prisma.user.findFirst({
@@ -40,7 +47,7 @@ export class GoogleAuthService implements OnModuleInit {
         return this.authenticationService.generateTokens(user);
       } else {
         const role = await this.prisma.role.findFirst({
-          where: { role: UserRoles.regular }
+          where: { role: UserRoles.regular },
         });
 
         const newUser = await this.prisma.user.create({
@@ -50,9 +57,9 @@ export class GoogleAuthService implements OnModuleInit {
             role: {
               connect: {
                 id: role?.id,
-              }
-            }
-          }
+              },
+            },
+          },
         });
         return this.authenticationService.generateTokens(newUser);
       }
