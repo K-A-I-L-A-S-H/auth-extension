@@ -86,7 +86,7 @@ export class AuthenticationService {
 
     const isValidPassword = await this.hashService.compare(
       password,
-      user.password,
+      user.password!,
     );
     if (!isValidPassword) {
       throw new UnauthorizedException('Password in incorrect');
