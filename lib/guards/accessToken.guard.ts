@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { REQUEST_USER_KEY } from '../constants';
+import { AuthType } from '@/src/constants';
 
 @Injectable()
 export class AccessTokenGuard implements CanActivate {
@@ -38,7 +39,7 @@ export class AccessTokenGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
-    const [_, token] = request.headers.authorization?.split(' ') ?? [];
-    return token;
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    return type === AuthType.Bearer ? token : undefined;
   }
 }

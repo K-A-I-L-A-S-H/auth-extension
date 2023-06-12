@@ -8,10 +8,13 @@ import { PrismaService } from '@/lib/prisma';
 import { APP_GUARD } from '@nestjs/core';
 import { AccessTokenGuard } from '@/lib/guards/accessToken.guard';
 import { AuthenticationGuard } from '@/lib/guards/authentication.guard';
-import { RefreshTokenIdsStorage } from './authentication/refreshTokenIds.storage';
+import { RefreshTokenIdsStorage } from './authorizarion/refreshTokenIds.storage';
 import { RedisService } from '@/lib/redis/redis.service';
 import { RoleGuard } from '@/lib/guards/roles.guard';
 import { PermissionGuard } from '@/lib/guards/permission.guard';
+import { ApiKeyGuard } from '@/lib/guards/apiKey.guard';
+import { ApiKeysController } from './apiKeys/apiKeys.controller';
+import { ApiKeysService } from './apiKeys/apiKeys.service';
 
 const JWT_MODULE = JwtModule.register({
   global: true,
@@ -43,11 +46,13 @@ const JWT_MODULE = JwtModule.register({
       useClass: PermissionGuard,
     },
     AccessTokenGuard,
+    ApiKeyGuard,
+    ApiKeysService,
     AuthenticationService,
     PrismaService,
     RedisService,
     RefreshTokenIdsStorage,
   ],
-  controllers: [AuthenticationController],
+  controllers: [AuthenticationController, ApiKeysController],
 })
 export class IAMModule {}

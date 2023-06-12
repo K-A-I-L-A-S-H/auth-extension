@@ -21,3 +21,8 @@ export enum CoffeesPermission {
 }
 
 export type PermissionType = CoffeesPermission;
+
+export interface GeneratedApiKeyPayload {
+  apiKey: string;
+  hashedKey: string;
+}
