@@ -15,11 +15,13 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  name     String? @db.VarChar(255)
-  email    String  @unique @db.VarChar(255)
-  password String? @db.VarChar(511)
-  roleId   String
-  googleId String? @db.Text
+  name         String? @db.VarChar(255)
+  email        String  @unique @db.VarChar(255)
+  password     String? @db.VarChar(511)
+  roleId       String
+  googleId     String? @db.Text
+  isTfaEnabled Boolean @default(false) @db.Boolean
+  tfaSecret    String? @db.Text
 
   role           Role             @relation(fields: [roleId], references: [id])
   userPermission UserPermission[]
