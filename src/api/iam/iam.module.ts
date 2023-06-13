@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { HashingService } from './hashing/hashing.service';
 import { BcryptService } from './hashing/bcrypt.service';
 import { AuthenticationController } from './authentication/authentication.controller';
@@ -18,6 +18,14 @@ import { ApiKeysService } from './apiKeys/apiKeys.service';
 import { GoogleAuthService } from './authentication/social/googleAuth.service';
 import { GoogleAuthController } from './authentication/social/googleAuth.controller';
 import { OTPAuthenticationService } from './authentication/otpAuthentication/otpAuthentication.service';
+import session from 'express-session';
+import passport from '@nestjs/passport';
+import { ConfigService } from '@nestjs/config';
+import { UserSerializer } from './authentication/serializers/userSerializer';
+import { SessionAuthenticationController } from './authentication/sessionAuthentication.controller';
+import { SessionAuthenticationService } from './authentication/sessionAuthentication.service';
+import createRedisStore from 'connect-redis';
+import { Redis } from 'ioredis';
 
 const JWT_MODULE = JwtModule.register({
   global: true,
@@ -57,11 +65,44 @@ const JWT_MODULE = JwtModule.register({
     PrismaService,
     RedisService,
     RefreshTokenIdsStorage,
+    SessionAuthenticationService,
+    UserSerializer,
   ],
   controllers: [
     ApiKeysController,
     AuthenticationController,
     GoogleAuthController,
+    SessionAuthenticationController,
   ],
 })
-export class IAMModule {}
+export class IAMModule implements NestModule {
+  constructor(private readonly configService: ConfigService) {}
+
+  configure(consumer: MiddlewareConsumer) {
+    const RedisStore = createRedisStore(session);
+
+    consumer
+      .apply(
+        session({
+          store: new RedisStore({
+            client: new Redis(
+              this.configService.get('REDIS_PORT')!,
+              this.configService.get('REDIS_HOST')!,
+            ),
+          }),
+          secret: this.configService.get('SESSION_SECRET')!,
+          resave: false,
+          saveUninitialized: false,
+          cookie: {
+            sameSite: true,
+            httpOnly: true,
+          },
+        }),
+        // @ts-expect-error
+        passport.initialize(),
+        // @ts-expect-error
+        passport.session(),
+      )
+      .forRoutes('*');
+  }
+}
