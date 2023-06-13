@@ -10,7 +10,7 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PrismaService
-  extends PrismaClient
+  extends PrismaClient<Prisma.PrismaClientOptions, 'info' | 'query'>
   implements OnModuleInit, OnModuleDestroy
 {
   private readonly logger = new Logger(PrismaService.name);
@@ -35,7 +35,6 @@ export class PrismaService
 
     if (this.configService.get('ENABLE_PRISMA_LOG')) {
       this.$on(
-        //@ts-expect-error
         'query',
         ({
           query,
@@ -44,7 +43,7 @@ export class PrismaService
         }: {
           query: string;
           params: string;
-          duration: string;
+          duration: number;
         }) => {
           const paramList = JSON.parse(params) as string[];
           let queryString = query;

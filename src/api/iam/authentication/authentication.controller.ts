@@ -74,7 +74,6 @@ export class AuthenticationController {
   @Post('2fa/generate/otp')
   async generateOtp(@ActiveUser() user: ActiveUserData) {
     const { secret, otp } = this.otpAuthService.generateOtp(user.email);
-    console.log({secret});
     await this.otpAuthService.enableTfaForUser(user.email, secret);
     return {
       otp,
@@ -85,7 +84,7 @@ export class AuthenticationController {
   @HttpCode(HttpStatus.OK)
   @Post('2fa/verify')
   async verify(
-    @Body() { otp }: { otp: string; },
+    @Body() { otp }: { otp: string },
     @ActiveUser() user: ActiveUserData,
   ) {
     return this.otpAuthService.verifyOtp(otp, user);
