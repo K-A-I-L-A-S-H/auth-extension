@@ -9,7 +9,6 @@ import {
 import { Request } from 'express';
 import { PrismaService } from '../prisma';
 import { REQUEST_USER_KEY } from '../constants';
-import { user } from 'firebase-functions/v1/auth';
 import { ActiveUserData } from '@/src/api/iam/types';
 
 @Injectable()
