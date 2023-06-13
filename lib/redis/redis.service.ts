@@ -5,8 +5,7 @@ import { Redis } from 'ioredis';
 @Injectable()
 export class RedisService implements OnModuleInit {
   private redisClient: Redis;
-  constructor(private readonly configService: ConfigService) {
-  }
+  constructor(private readonly configService: ConfigService) {}
 
   onModuleInit() {
     this.redisClient = new Redis({

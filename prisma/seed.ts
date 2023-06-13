@@ -66,7 +66,7 @@ async function seed() {
 
 seed()
   .catch((err) => {
-    console.log(`Error while adding seed data: ${JSON.stringify(err)}`);
+    console.error(`Error while adding seed data: ${JSON.stringify(err)}`);
     process.exit(1);
   })
   .finally(() => {

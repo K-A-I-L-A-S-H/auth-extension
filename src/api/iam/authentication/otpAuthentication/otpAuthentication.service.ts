@@ -1,5 +1,9 @@
 import { PrismaService } from '@/lib/prisma';
-import { Injectable, OnModuleInit, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { authenticator, totp } from 'otplib';
 import Cryptr from 'cryptr';
@@ -58,22 +62,20 @@ export class OTPAuthenticationService implements OnModuleInit {
   async verifyOtp(otp: string, user: ActiveUserData) {
     try {
       const { tfaSecret } = await this.prisma.user.findFirstOrThrow({
-      where: {
-        id: user.sub,
-      },
-      select: {
-        tfaSecret: true,
-      }
-    });
-    const secret = this.encryptor.decrypt(tfaSecret!);
-    console.log({secret});
+        where: {
+          id: user.sub,
+        },
+        select: {
+          tfaSecret: true,
+        },
+      });
+      const secret = this.encryptor.decrypt(tfaSecret!);
 
-    return totp.verify({
-      token: otp,
-      secret: secret,
-    });
-
-    } catch(err) {
+      return totp.verify({
+        token: otp,
+        secret: secret,
+      });
+    } catch (err) {
       throw new UnauthorizedException();
     }
   }

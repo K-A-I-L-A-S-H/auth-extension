@@ -75,7 +75,11 @@ export class AuthenticationService {
     }
   }
 
-  async signin({ email, password, tfaCode }: SignInDto): Promise<SignInResponse> {
+  async signin({
+    email,
+    password,
+    tfaCode,
+  }: SignInDto): Promise<SignInResponse> {
     const user = await this.prisma.user.findUnique({
       where: {
         email,
@@ -94,11 +98,8 @@ export class AuthenticationService {
       throw new UnauthorizedException('Password in incorrect');
     }
 
-    if(user.isTfaEnabled) {
-      const isValid = this.otpAuthService.verifyCode(
-        tfaCode!,
-        user.tfaSecret!,
-      );
+    if (user.isTfaEnabled) {
+      const isValid = this.otpAuthService.verifyCode(tfaCode!, user.tfaSecret!);
       if (!isValid) {
         throw new UnauthorizedException('Invalid 2FA code');
       }
