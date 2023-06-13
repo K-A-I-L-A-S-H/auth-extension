@@ -22,9 +22,9 @@ ARG PORT=8000
 EXPOSE ${PORT}
 ENV PORT=${PORT}
 ENV NODE_ENV=production
-COPY --from=build /app/dist /app/dist
-COPY --from=build /app/prisma /app/prisma
-COPY --from=build /app/node_modules /app/node_modules
+COPY --from=build /app/dist dist
+COPY --from=build /app/prisma prisma
+COPY --from=build /app/node_modules node_modules
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 app
 RUN chown -R app:nodejs ./dist

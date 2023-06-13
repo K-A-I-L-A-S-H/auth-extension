@@ -11,13 +11,14 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_USER=postgres
       - POSTGRES_DATABASE=postgres
+      - POSTGRES_HOST=localhost
     volumes:
       - pgsql-volume:/var/lib/postgresql/data
 
   redis:
     profiles:
       - all
-    image: redis
+    image: "redis/redis-stack"
     restart: always
     ports:
       - "6379:6379"
