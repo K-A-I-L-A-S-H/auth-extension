@@ -95,7 +95,7 @@ export class AuthenticationService {
       user.password!,
     );
     if (!isValidPassword) {
-      throw new UnauthorizedException('Password in incorrect');
+      throw new UnauthorizedException('Password is incorrect');
     }
 
     if (user.isTfaEnabled) {
